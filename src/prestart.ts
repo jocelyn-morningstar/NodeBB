@@ -31,11 +31,18 @@ export function setupWinston(): void {
         formats.push(winston.format.simple());
     }
 
+    // .apply() produces an array of 'any' so used work around below
+    const nf = formats.length;
+    let myFormat = winston.format.combine(formats[0], formats[1]);
+    if (nf === 3) {
+        myFormat = winston.format.combine(formats[0], formats[1], formats[2]);
+    } else {
+        winston.format.combine(formats[0], formats[1], formats[2], formats[3]);
+    }
     winston.configure({
         level: String(nconf.get('log-level')) || (process.env.NODE_ENV === 'production' ? 'info' : 'verbose'),
-        // The next line calls a function in a module that has not been updated to TS yet
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        format: winston.format.combine.apply(null, formats),
+        // format: winston.format.combine.apply(null, formats),
+        format: myFormat,
         transports: [
             new winston.transports.Console({
                 handleExceptions: true,
