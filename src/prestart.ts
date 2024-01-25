@@ -12,12 +12,12 @@ export function setupWinston(): void {
         return;
     }
 
-    const formats = [];
-    if (nconf.get('log-colorize') !== 'false') {
+    const formats: winston.Logform.Format[] = [];
+    if (String(nconf.get('log-colorize')) !== 'false') {
         formats.push(winston.format.colorize());
     }
 
-    if (nconf.get('json-logging')) {
+    if (String(nconf.get('json-logging'))) {
         formats.push(winston.format.timestamp());
         formats.push(winston.format.json());
     } else {
@@ -33,7 +33,8 @@ export function setupWinston(): void {
 
     winston.configure({
         level: String(nconf.get('log-level')) || (process.env.NODE_ENV === 'production' ? 'info' : 'verbose'),
-
+        // The next line calls a function in a module that has not been updated to TS yet
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         format: winston.format.combine.apply(null, formats),
         transports: [
             new winston.transports.Console({
@@ -61,6 +62,8 @@ export function loadConfig(configFile: string): void {
 
     // Explicitly cast as Bool, loader.js passes in isCluster as string 'true'/'false'
     const castAsBool: string[] = ['isCluster', 'isPrimary', 'jobsDisabled'];
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     nconf.stores.env.readOnly = false;
     castAsBool.forEach((prop) => {
         const value = String(nconf.get(prop));
@@ -68,6 +71,8 @@ export function loadConfig(configFile: string): void {
             nconf.set(prop, ['1', 1, 'true', true].includes(value));
         }
     });
+    // The next line calls a function in a module that has not been updated to TS yet
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     nconf.stores.env.readOnly = true;
     nconf.set('runJobs', nconf.get('isPrimary') && !nconf.get('jobsDisabled'));
 
